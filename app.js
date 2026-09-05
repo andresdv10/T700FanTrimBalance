@@ -132,7 +132,15 @@ function calcular(){
       document.getElementById("outCorr").textContent = `M = ${Mcorr.toFixed(2)} oz·in @ ${AngCorr.toFixed(1)}°`;
     }
 
-    document.getElementById("outCombo").textContent = `${isHole?"Hole‑centered":"Space‑centered"} · Pernos: ${w} · Posiciones: ${labels.join(", ")} · Momento total: ${row.cum.toFixed(2)} oz·in`;
+    const ranges=[];
+    for(const label of labels){
+      const last=ranges[ranges.length-1];
+      if(last && label===last[1]+1) last[1]=label;
+      else ranges.push([label,label]);
+    }
+    const location=ranges.map(([start,end])=>start===end ? `la posición ${start}` : `las posiciones ${start} y ${end}`).join(" y entre ");
+    const installation=labels.length===1 ? `Instalar 1 perno en la posición ${labels[0]}.` : `Instalar ${w} pernos entre ${location}, incluidos los extremos.`;
+    document.getElementById("outCombo").textContent = `${installation}\nSentido antihorario · Vista frontal\n${isHole?"Hole‑centered":"Space‑centered"} · Momento total: ${row.cum.toFixed(2)} oz·in`;
 
     draw(AngCorr, idx, mod);
   }catch(err){
@@ -161,9 +169,10 @@ function draw(angleDeg, posIdxList, mod){
     const ang=(-i*step-90)*Math.PI/180;
     const x=cx+Math.cos(ang)*r, y=cy+Math.sin(ang)*r;
     const sel=posIdxList.includes(i);
-    ctx.beginPath(); ctx.arc(x,y, sel?7:4, 0, Math.PI*2);
-    ctx.fillStyle=sel?"#59d6cf":"#63758b"; ctx.fill();
-    ctx.fillStyle="#e6f0ff"; ctx.font="22px ui-monospace";
+    ctx.beginPath(); ctx.arc(x,y, sel?10:4, 0, Math.PI*2);
+    ctx.fillStyle=sel?"#ffdf5d":"#63758b"; ctx.fill();
+    if(sel){ ctx.strokeStyle="#ffffff"; ctx.lineWidth=2; ctx.stroke(); }
+    ctx.fillStyle=sel?"#ffdf5d":"#a6b7cc"; ctx.font=sel?"bold 24px ui-monospace":"22px ui-monospace";
     const label=String(i+1);
     ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText(label, cx+Math.cos(ang)*(r+23), cy+Math.sin(ang)*(r+23));
@@ -172,7 +181,7 @@ function draw(angleDeg, posIdxList, mod){
   // Vector de corrección
   const a=(-angleDeg-90)*Math.PI/180;
   ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(a)*r, cy+Math.sin(a)*r);
-  ctx.strokeStyle="#ffd166"; ctx.lineWidth=3; ctx.stroke();
+  ctx.strokeStyle="#f8fafc"; ctx.lineWidth=3; ctx.stroke();
   ctx.fillStyle="#a7bdd9"; ctx.textAlign="center"; ctx.font="20px system-ui";
   ctx.fillText("VISTA FRONTAL",cx,cy-30);
 }
