@@ -1,9 +1,9 @@
 
 // -------- Utilidades de entrada ----------
 function toNumber(v){
-  if(typeof v!=="string") return Number(v);
-  v = v.trim().replace(/\s+/g,"").replace(",", ".").replace(/[^0-9\.\-\+eE]/g,"");
-  return Number(v);
+  if(typeof v==="number") return v;
+  const text=String(v).trim().replace(",", ".");
+  return /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(text) ? Number(text) : NaN;
 }
 function getNum(id, name, min=-Infinity, max=Infinity){
   const el = document.getElementById(id);
@@ -19,6 +19,8 @@ function showError(msg){
 }
 function clearError(){ const box = document.getElementById("errorBox"); box.style.display="none"; box.textContent=""; }
 
+// Fuente exclusiva: AMM TPA A330/A340, TASK 71-00-00-700-848-A,
+// revisión 5, 01-Jul-2026. K/β: figuras 26100/26200; tablas A/B: figura 18400.
 // -------- Datos AMM ----------
 const KBETA={
   flight:[
@@ -29,7 +31,7 @@ const KBETA={
   ],
   ground:[
     {n1:88,K:131.0,B:125},{n1:87,K:131.1,B:124},{n1:86,K:127.6,B:122},{n1:85,K:124.1,B:121},
-    {n1:84,K:123.3,B:121},{n1:83,K:122.5,B:122},{n1:82,K:122.2,B:122},{n1:81,K:122.4,B:124},
+    {n1:84,K:123.3,B:121},{n1:83,K:122.5,B:121},{n1:82,K:122.2,B:122},{n1:81,K:122.4,B:124},
     {n1:80,K:122.6,B:126},{n1:79,K:126.8,B:133},{n1:78,K:131.0,B:140},{n1:77,K:137.4,B:145},
     {n1:76,K:145.7,B:147},
   ]
@@ -50,11 +52,16 @@ const TABLE_B=[
 
 // -------- Utilidades numéricas ----------
 const $=(id)=>document.getElementById(id);
-function nearestKbeta(mode,n1){ const arr=KBETA[mode]; let best=arr[0], d=Math.abs(arr[0].n1-n1); for(const r of arr){ const dd=Math.abs(r.n1-n1); if(dd<d){d=dd; best=r;} } return best; }
+function lookupKbeta(mode,n1){
+  const row=KBETA[mode].find(r=>r.n1===n1);
+  if(!row) throw new Error("N1 debe ser un valor entero tabulado entre 76 y 88 %. No se aplica interpolación ni aproximación.");
+  return row;
+}
 function norm(a){ a%=360; if(a<0)a+=360; return a; }
 function toVec(mag,deg){ const rad=deg*Math.PI/180; return {x:mag*Math.cos(rad), y:mag*Math.sin(rad)}; }
 function fromVec(x,y){ const mag=Math.hypot(x,y); let deg=Math.atan2(y,x)*180/Math.PI; return {mag, deg:norm(deg)}; }
-function chooseCombo(table,M){ let best=table[0]; for(const row of table){ if(row.cum<=M+1e-9) best=row; } return best; }
+// Selección acumulativa conservadora: mayor valor tabulado que no excede M.
+function chooseCombo(table,M){ let best=null; for(const row of table){ if(row.cum<=M) best=row; } return best; }
 function wrap(i,m){ i%=m; if(i<0)i+=m; return i; }
 
 // Registro y comparación; no altera el cálculo de corrección.
@@ -69,6 +76,7 @@ function parseExistingPositions(value){
 }
 function resetResult(){
   for(const id of ["outChk","outCorr","outCombo"]) $(id).textContent="—";
+  $("calculationDetail").textContent="";
   $("existingReport").textContent="Datos pendientes de cálculo. Revisa la configuración y pulsa Calcular.";
   $("existingReport").className="existing-report";
   const c=$("rotor"); c.getContext("2d").clearRect(0,0,c.width,c.height);
@@ -89,48 +97,74 @@ function calcular(){
     const existing=readExisting();
     const mode=$("mode").value;
     const mod=54;
+    if(!["flight","ground"].includes(mode)) throw new Error("Selecciona un modo válido.");
 
-    const r1={n:getNum("n1_1","N1‑1", 60,100), u:getNum("u_1","U‑1", 0, 9), a:getNum("a_1","A‑1", 0, 360)};
-    const r2={n:getNum("n1_2","N1‑2", 60,100), u:getNum("u_2","U‑2", 0, 9), a:getNum("a_2","A‑2", 0, 360)};
-    const r3={n:getNum("n1_3","N1‑3", 60,100), u:getNum("u_3","U‑3", 0, 9), a:getNum("a_3","A‑3", 0, 360)};
+    const r1={n:getNum("n1_1","N1‑1", 76,88), u:getNum("u_1","U‑1", 0), a:getNum("a_1","A‑1", 0, 360)};
+    const r2=mode==="ground" ? {n:getNum("n1_2","N1‑2", 76,88), u:getNum("u_2","U‑2", 0), a:getNum("a_2","A‑2", 0, 360)} : null;
+    const r3=mode==="ground" ? {n:getNum("n1_3","N1‑3", 76,88), u:getNum("u_3","U‑3", 0), a:getNum("a_3","A‑3", 0, 360)} : null;
 
-    let Mcorr, AngCorr, deltaM="—", deltaA="—";
+    const detail=[];
+    let Mcorr, AngCorr, deltaM="—", deltaA="—", inconsistent=false;
 
     if(mode==="flight"){
       // In‑Flight (single shot)
-      const kb=nearestKbeta("flight", r1.n);
+      const kb=lookupKbeta("flight", r1.n);
       const M = r1.u * kb.K;
       const ang = norm(r1.a + kb.B);
       Mcorr = M; AngCorr = ang;
+      detail.push(`Dato 1: N1 ${r1.n}% · K ${kb.K} · β ${kb.B}° · U×K ${M.toFixed(3)} oz·in · A+β ${ang.toFixed(3)}°`);
     }else{
       // Ground Run (3 datos): R/3
       const runs=[r1,r2,r3];
       const vecs=[], mags=[], angs=[];
       for(const r of runs){
-        const kb=nearestKbeta("ground", r.n);
+        const kb=lookupKbeta("ground", r.n);
         const Mi=r.u*kb.K;
         const thetai=norm(r.a+kb.B);
+        detail.push(`Dato ${detail.length+1}: N1 ${r.n}% · K ${kb.K} · β ${kb.B}° · U×K ${Mi.toFixed(3)} oz·in · A+β ${thetai.toFixed(3)}°`);
         vecs.push(toVec(Mi,thetai)); mags.push(Mi); angs.push(thetai);
       }
       const Mmin=Math.min(...mags), Mmax=Math.max(...mags);
       const Amin=Math.min(...angs), Amax=Math.max(...angs);
       deltaM=(Mmax-Mmin).toFixed(2); deltaA=(Amax-Amin).toFixed(1);
+      // No se incorpora un criterio circular no descrito numéricamente por el AMM.
+      // Se deriva a revisión cuando la dispersión cruza la referencia 0°.
+      const span=Amax-Amin;
+      if(span>180){
+        throw new Error("Las posiciones angulares cruzan la referencia de 0° o presentan una dispersión amplia. Revisar el diagrama vectorial según AMM 4.B; esta app no emite una distribución automática para este caso.");
+      }
+      inconsistent=(Mmax-Mmin)>=40 || span>=30;
 
       const sumX=vecs.reduce((s,v)=>s+v.x,0), sumY=vecs.reduce((s,v)=>s+v.y,0);
       const R=fromVec(sumX,sumY);
       Mcorr=R.mag/3; AngCorr=R.deg;
     }
 
+    if(!Number.isFinite(Mcorr) || !Number.isFinite(AngCorr)) throw new Error("El cálculo excede la precisión numérica disponible. Revisa las entradas.");
+    $("calculationDetail").textContent=detail.join("\n");
+
+    // El AMM 4.B.(3) exige variaciones inferiores a 40 oz·in y 30°.
+    if(mode==="ground" && inconsistent){
+      throw new Error(`Datos inconsistentes: ΔM=${deltaM} oz·in; Δθ=${deltaA}°. El AMM 4.B.(3) exige ΔM < 40 oz·in y Δθ < 30°. El AMM indica lubricar las raíces de los álabes (TASK 72-31-41-300-802) y repetir la recogida de datos. No se emite una distribución de pernos.`);
+    }
+
     // Hole vs Space
     const step=360/mod;
-    const tol=Math.min(0.2, step/20);
+    // Solo margen de error de coma flotante, no tolerancia angular de mantenimiento.
+    // Se elimina la anterior banda de 0,2°, no especificada en el AMM.
+    const tol=64*Number.EPSILON*360;
     const distToGrid=Math.min(
       Math.abs(AngCorr - Math.round(AngCorr/step)*step),
       Math.abs((AngCorr+360) - Math.round((AngCorr+360)/step)*step)
     );
     const isHole = distToGrid <= tol;
 
-    const row=chooseCombo(isHole?TABLE_A:TABLE_B, Mcorr);
+    const table=isHole?TABLE_A:TABLE_B;
+    if(Mcorr<table[0].cum || Mcorr>table[table.length-1].cum){
+      throw new Error(`Corrección calculada: ${Mcorr.toFixed(2)} oz·in @ ${AngCorr.toFixed(1)}°. Fuera del intervalo de combinaciones acumulativas que utiliza esta app (${table[0].cum.toFixed(2)} a ${table[table.length-1].cum.toFixed(2)} oz·in). Requiere evaluar una combinación según el AMM; no se emite una distribución automática.`);
+    }
+    const row=chooseCombo(table, Mcorr);
+    if(!row) throw new Error("No hay una combinación acumulativa sin sobrecorrección dentro del método implementado.");
     const w=row.w;
 
     // Posiciones
@@ -166,7 +200,7 @@ function calcular(){
     }
     const location=ranges.map(([start,end])=>start===end ? `la posición ${start}` : `las posiciones ${start} y ${end}`).join(" y entre ");
     const installation=labels.length===1 ? `Instalar 1 perno en la posición ${labels[0]}.` : `Instalar ${w} pernos entre ${location}, incluidos los extremos.`;
-    document.getElementById("outCombo").textContent = `${existing.length ? installation.replace("Instalar ","Corrección calculada: ") : installation}\nSentido antihorario · Vista frontal\n${isHole?"Hole‑centered":"Space‑centered"} · Momento total: ${row.cum.toFixed(2)} oz·in`;
+    document.getElementById("outCombo").textContent = `${existing.length ? installation.replace("Instalar ","Corrección calculada: ") : installation}\nSentido antihorario · Vista frontal\n${isHole?"Hole‑centered":"Space‑centered"} · Momento tabulado: ${row.cum.toFixed(2)} oz·in\nDiferencia de magnitud: ${(Mcorr-row.cum).toFixed(3)} oz·in (no es un límite de aceptación)`;
 
     const overlaps=labels.filter(position=>existing.includes(position));
     const report=$("existingReport");
@@ -253,7 +287,7 @@ document.querySelectorAll(".chip[data-preset]").forEach(ch=>{
       document.getElementById("n1_1").value = parts[0];
       document.getElementById("n1_2").value = parts[1];
       document.getElementById("n1_3").value = parts[2];
-      resetResult();
+      clearError(); resetResult();
     }
   });
 });

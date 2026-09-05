@@ -27,7 +27,7 @@
   <section class="mode-panel">
     <h2>
       Modo
-      <span class="presets" id="presetBar" title="Sugeridos (solo Ground)">
+      <span class="presets" id="presetBar" title="Selección de N1 (Ground); 85/82/79 es la recomendación del AMM">
         <!-- chips de presets -->
         <button type="button" class="chip" data-preset="85,82,79">N1: 85 / 82 / 79</button>
         <button type="button" class="chip" data-preset="86,83,80">86 / 83 / 80</button>
@@ -63,7 +63,7 @@
         <thead>
           <tr>
             <th></th>
-            <th>N1 (%)</th>
+            <th>N1 (%)<br><small>76–88 · enteros</small></th>
             <th>U (IPS)</th>
             <th>A (°)</th>
           </tr>
@@ -101,6 +101,7 @@
       <div class="card"><h3>Corrección calculada</h3><div class="big mono" id="outCombo">—</div></div>
     </div>
     <div id="existingReport" class="existing-report" role="status" aria-live="polite">Selecciona si hay pernos instalados y pulsa Calcular.</div>
+    <details class="calculation-details"><summary>Coeficientes y cálculo por lectura</summary><p id="calculationDetail"></p><p>K en oz·in/IPS. Coeficientes: figuras 71-00-00-991-26100-22-A (Flight) y 71-00-00-991-26200-22-A (Ground).</p></details>
     <div class="diagram-heading"><span>Distribución de pernos</span><span>Vista frontal · ↺ Antihorario</span></div>
 <canvas id="rotor" width="1000" height="1000" aria-label="Distribución de 54 posiciones, numeradas en sentido antihorario desde la posición 1 superior"></canvas>
 <div class="legend"><span><i class="bolt"></i>Corrección calculada</span><span><i class="existing"></i>Existentes (cuadrados)</span><span><i class="overlap"></i>Coincidencia (anillo)</span><span><i class="vector"></i>Vector de corrección</span></div>
@@ -108,10 +109,11 @@
 </main>
 <footer class="wrap">
   <strong>Diseñado por <span id="authorName">Jaime A. Botero</span></strong>
-  <p>Herramienta de apoyo para uso de mantenimiento bajo los parámetros establecidos en el AMM aplicable.</p>
+  <p>Herramienta de apoyo al cálculo de mantenimiento con los datos de la copia del AMM indicada abajo. Verificar su vigencia y aplicabilidad al avión/motor antes del uso.</p>
   <p>Referencia documental: Airbus A330/A340 AMM · TASK 71-00-00-700-848-A · Test No.16A<br>
   The LP Compressor Rotor Trim Balance Procedure Calculated From In-flight or Ground Run Vibration Data (Single Shot Fan Trim Balance).<br>
   Copia consultada: personalización TPA · Revisión 5 · 01-Jul-2026.</p>
+  <details><summary>Alcance del cálculo</summary><p>Ground: tres lecturas. Flight: una lectura. N1: valores tabulados de 76 a 88 %, sin interpolación. Selección de combinaciones acumulativas A/B con preferencia por subcorrección. Las combinaciones alternativas del apartado 4.C y la redistribución de pesos existentes de la figura 71-00-00-991-18300-22-A, detalle 2, requieren evaluación aparte. La app no comprueba las condiciones mecánicas, la instalación ni la aceptación posterior del motor.</p></details>
 </footer>
 
 <script src="app.js"></script>

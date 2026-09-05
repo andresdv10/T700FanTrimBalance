@@ -6,3 +6,5 @@
 #outCombo{white-space:pre-line;line-height:1.7}.legend i.bolt{background:#ffdf5d;outline:1px solid white;width:10px;height:10px}.legend i.vector{background:#f8fafc}
 
 .existing-controls{padding:18px 20px;border-bottom:1px solid var(--line)}#existingFields{margin-top:16px}#existingPositions{text-align:left}#positionsHelp{font-size:12px;color:var(--muted)}.confirmation{display:flex;align-items:flex-start;gap:10px;margin-top:16px}.confirmation input{width:20px;height:20px;flex:0 0 20px;accent-color:var(--accent)}.existing-report{white-space:pre-line;margin:0 20px 20px;padding:14px;border:1px solid var(--line);border-radius:8px;color:#cbd9ea;font-size:14px;line-height:1.65}.existing-report.conflict{border-color:#ff8d77;background:#321e26;color:#ffe5dd}.legend i.existing{border-radius:0;background:#74e5db}.legend i.overlap{background:#ffdf5d;outline:2px solid #ff8d77;outline-offset:2px}
+
+.calculation-details{margin:0 20px 20px;font-size:13px;color:var(--muted)}summary{cursor:pointer;padding:8px 0}#calculationDetail{white-space:pre-line;line-height:1.8}.calculation-details p{overflow-wrap:anywhere}footer details{margin-top:12px}
