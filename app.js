@@ -245,7 +245,7 @@ document.getElementById("mode").addEventListener("change", ()=>{ updateRows(); }
 document.getElementById("calcBtn").addEventListener("click", calcular);
 
 // Presets N1 chips
-document.querySelectorAll(".chip").forEach(ch=>{
+document.querySelectorAll(".chip[data-preset]").forEach(ch=>{
   ch.addEventListener("click", ()=>{
     const csv = ch.getAttribute("data-preset");
     const parts = csv.split(",").map(s=>s.trim());
@@ -256,6 +256,17 @@ document.querySelectorAll(".chip").forEach(ch=>{
       resetResult();
     }
   });
+});
+
+// Personalizar las tres velocidades sin modificar amplitudes ni fases.
+$("customN1").addEventListener("click",()=>{
+  for(const id of ["n1_1","n1_2","n1_3"]){
+    $(id).value="";
+    $(id).placeholder="N1 (%)";
+  }
+  clearError();
+  resetResult();
+  $("n1_1").focus();
 });
 
 // Inicialización
