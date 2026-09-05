@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -12,7 +12,7 @@
   <div class="wrap">
     <div class="brand">
       <!-- Simple inline SVG logo placeholder -->
-      <img class="logo" src="assets/logo.png" alt="Jaime B, aircraft mechanic — logo con motor">
+      <img class="logo" src="assets/logo.png" alt="Jaime B, aircraft mechanic — engine logo">
       <div>
         <h1>Fan trim balance T700</h1>
         <div class="subtitle">ROLLS-ROYCE TRENT 700 · LP COMPRESSOR</div>
@@ -26,36 +26,36 @@
 
   <section class="mode-panel">
     <h2>
-      Modo
-      <span class="presets" id="presetBar" title="Selección de N1 (Ground); 85/82/79 es la recomendación del AMM">
+      Mode
+      <span class="presets" id="presetBar" title="N1 selection (Ground); the AMM recommends 85/82/79">
         <!-- chips de presets -->
         <button type="button" class="chip" data-preset="85,82,79">N1: 85 / 82 / 79</button>
         <button type="button" class="chip" data-preset="86,83,80">86 / 83 / 80</button>
         <button type="button" class="chip" data-preset="84,81,78">84 / 81 / 78</button>
-        <button type="button" class="chip" id="customN1">Personalizado</button>
+        <button type="button" class="chip" id="customN1">Custom</button>
       </span>
     </h2>
     <div class="grid">
       <div>
-        <label for="mode">Selecciona el modo</label>
+        <label for="mode">Select operating mode</label>
         <select id="mode">
-          <option value="ground">Ground Run (3 datos)</option>
-          <option value="flight">In‑Flight (1 dato)</option>
+          <option value="ground">Ground Run (3 readings)</option>
+          <option value="flight">In‑Flight (1 reading)</option>
         </select>
       </div>
     </div>
   </section>
 
   <section>
-    <h2><span>Datos de vibración</span><small>01 / ENTRADA</small></h2>
+    <h2><span>Vibration data</span><small>01 / INPUT</small></h2>
     <div class="existing-controls">
-      <label for="hasExisting">¿Hay pernos de balance instalados?</label>
-      <select id="hasExisting"><option value="">Selecciona una opción</option><option value="no">No</option><option value="yes">Sí</option></select>
+      <label for="hasExisting">Are balance bolts already installed?</label>
+      <select id="hasExisting"><option value="">Select an option</option><option value="no">No</option><option value="yes">Yes</option></select>
       <div id="existingFields" hidden>
-        <label for="existingPositions">Posiciones actuales (1 a 54)</label>
-        <input id="existingPositions" type="text" placeholder="Ejemplo: 18, 19, 20" aria-describedby="positionsHelp">
-        <p id="positionsHelp">Escribe cada posición separada por comas. No uses rangos.</p>
-        <label class="confirmation"><input id="configurationConfirmed" type="checkbox">Confirmo que las lecturas de vibración se tomaron con estos pernos instalados en estas posiciones.</label>
+        <fieldset class="bolt-picker"><legend>Existing balance bolt positions</legend>
+        <div class="picker-toolbar"><span id="selectedCount" role="status">0 selected</span><button type="button" id="clearBolts" class="chip">Clear all</button></div>
+        <div class="bolt-columns"><div class="bolt-column"><label class="bolt-option" for="bolt-1"><input type="checkbox" id="bolt-1" class="existing-bolt" value="1" aria-label="Existing balance bolt at position 1"><span>1</span></label><label class="bolt-option" for="bolt-2"><input type="checkbox" id="bolt-2" class="existing-bolt" value="2" aria-label="Existing balance bolt at position 2"><span>2</span></label><label class="bolt-option" for="bolt-3"><input type="checkbox" id="bolt-3" class="existing-bolt" value="3" aria-label="Existing balance bolt at position 3"><span>3</span></label><label class="bolt-option" for="bolt-4"><input type="checkbox" id="bolt-4" class="existing-bolt" value="4" aria-label="Existing balance bolt at position 4"><span>4</span></label><label class="bolt-option" for="bolt-5"><input type="checkbox" id="bolt-5" class="existing-bolt" value="5" aria-label="Existing balance bolt at position 5"><span>5</span></label><label class="bolt-option" for="bolt-6"><input type="checkbox" id="bolt-6" class="existing-bolt" value="6" aria-label="Existing balance bolt at position 6"><span>6</span></label><label class="bolt-option" for="bolt-7"><input type="checkbox" id="bolt-7" class="existing-bolt" value="7" aria-label="Existing balance bolt at position 7"><span>7</span></label><label class="bolt-option" for="bolt-8"><input type="checkbox" id="bolt-8" class="existing-bolt" value="8" aria-label="Existing balance bolt at position 8"><span>8</span></label><label class="bolt-option" for="bolt-9"><input type="checkbox" id="bolt-9" class="existing-bolt" value="9" aria-label="Existing balance bolt at position 9"><span>9</span></label><label class="bolt-option" for="bolt-10"><input type="checkbox" id="bolt-10" class="existing-bolt" value="10" aria-label="Existing balance bolt at position 10"><span>10</span></label><label class="bolt-option" for="bolt-11"><input type="checkbox" id="bolt-11" class="existing-bolt" value="11" aria-label="Existing balance bolt at position 11"><span>11</span></label><label class="bolt-option" for="bolt-12"><input type="checkbox" id="bolt-12" class="existing-bolt" value="12" aria-label="Existing balance bolt at position 12"><span>12</span></label><label class="bolt-option" for="bolt-13"><input type="checkbox" id="bolt-13" class="existing-bolt" value="13" aria-label="Existing balance bolt at position 13"><span>13</span></label><label class="bolt-option" for="bolt-14"><input type="checkbox" id="bolt-14" class="existing-bolt" value="14" aria-label="Existing balance bolt at position 14"><span>14</span></label><label class="bolt-option" for="bolt-15"><input type="checkbox" id="bolt-15" class="existing-bolt" value="15" aria-label="Existing balance bolt at position 15"><span>15</span></label><label class="bolt-option" for="bolt-16"><input type="checkbox" id="bolt-16" class="existing-bolt" value="16" aria-label="Existing balance bolt at position 16"><span>16</span></label><label class="bolt-option" for="bolt-17"><input type="checkbox" id="bolt-17" class="existing-bolt" value="17" aria-label="Existing balance bolt at position 17"><span>17</span></label><label class="bolt-option" for="bolt-18"><input type="checkbox" id="bolt-18" class="existing-bolt" value="18" aria-label="Existing balance bolt at position 18"><span>18</span></label></div><div class="bolt-column"><label class="bolt-option" for="bolt-19"><input type="checkbox" id="bolt-19" class="existing-bolt" value="19" aria-label="Existing balance bolt at position 19"><span>19</span></label><label class="bolt-option" for="bolt-20"><input type="checkbox" id="bolt-20" class="existing-bolt" value="20" aria-label="Existing balance bolt at position 20"><span>20</span></label><label class="bolt-option" for="bolt-21"><input type="checkbox" id="bolt-21" class="existing-bolt" value="21" aria-label="Existing balance bolt at position 21"><span>21</span></label><label class="bolt-option" for="bolt-22"><input type="checkbox" id="bolt-22" class="existing-bolt" value="22" aria-label="Existing balance bolt at position 22"><span>22</span></label><label class="bolt-option" for="bolt-23"><input type="checkbox" id="bolt-23" class="existing-bolt" value="23" aria-label="Existing balance bolt at position 23"><span>23</span></label><label class="bolt-option" for="bolt-24"><input type="checkbox" id="bolt-24" class="existing-bolt" value="24" aria-label="Existing balance bolt at position 24"><span>24</span></label><label class="bolt-option" for="bolt-25"><input type="checkbox" id="bolt-25" class="existing-bolt" value="25" aria-label="Existing balance bolt at position 25"><span>25</span></label><label class="bolt-option" for="bolt-26"><input type="checkbox" id="bolt-26" class="existing-bolt" value="26" aria-label="Existing balance bolt at position 26"><span>26</span></label><label class="bolt-option" for="bolt-27"><input type="checkbox" id="bolt-27" class="existing-bolt" value="27" aria-label="Existing balance bolt at position 27"><span>27</span></label><label class="bolt-option" for="bolt-28"><input type="checkbox" id="bolt-28" class="existing-bolt" value="28" aria-label="Existing balance bolt at position 28"><span>28</span></label><label class="bolt-option" for="bolt-29"><input type="checkbox" id="bolt-29" class="existing-bolt" value="29" aria-label="Existing balance bolt at position 29"><span>29</span></label><label class="bolt-option" for="bolt-30"><input type="checkbox" id="bolt-30" class="existing-bolt" value="30" aria-label="Existing balance bolt at position 30"><span>30</span></label><label class="bolt-option" for="bolt-31"><input type="checkbox" id="bolt-31" class="existing-bolt" value="31" aria-label="Existing balance bolt at position 31"><span>31</span></label><label class="bolt-option" for="bolt-32"><input type="checkbox" id="bolt-32" class="existing-bolt" value="32" aria-label="Existing balance bolt at position 32"><span>32</span></label><label class="bolt-option" for="bolt-33"><input type="checkbox" id="bolt-33" class="existing-bolt" value="33" aria-label="Existing balance bolt at position 33"><span>33</span></label><label class="bolt-option" for="bolt-34"><input type="checkbox" id="bolt-34" class="existing-bolt" value="34" aria-label="Existing balance bolt at position 34"><span>34</span></label><label class="bolt-option" for="bolt-35"><input type="checkbox" id="bolt-35" class="existing-bolt" value="35" aria-label="Existing balance bolt at position 35"><span>35</span></label><label class="bolt-option" for="bolt-36"><input type="checkbox" id="bolt-36" class="existing-bolt" value="36" aria-label="Existing balance bolt at position 36"><span>36</span></label></div><div class="bolt-column"><label class="bolt-option" for="bolt-37"><input type="checkbox" id="bolt-37" class="existing-bolt" value="37" aria-label="Existing balance bolt at position 37"><span>37</span></label><label class="bolt-option" for="bolt-38"><input type="checkbox" id="bolt-38" class="existing-bolt" value="38" aria-label="Existing balance bolt at position 38"><span>38</span></label><label class="bolt-option" for="bolt-39"><input type="checkbox" id="bolt-39" class="existing-bolt" value="39" aria-label="Existing balance bolt at position 39"><span>39</span></label><label class="bolt-option" for="bolt-40"><input type="checkbox" id="bolt-40" class="existing-bolt" value="40" aria-label="Existing balance bolt at position 40"><span>40</span></label><label class="bolt-option" for="bolt-41"><input type="checkbox" id="bolt-41" class="existing-bolt" value="41" aria-label="Existing balance bolt at position 41"><span>41</span></label><label class="bolt-option" for="bolt-42"><input type="checkbox" id="bolt-42" class="existing-bolt" value="42" aria-label="Existing balance bolt at position 42"><span>42</span></label><label class="bolt-option" for="bolt-43"><input type="checkbox" id="bolt-43" class="existing-bolt" value="43" aria-label="Existing balance bolt at position 43"><span>43</span></label><label class="bolt-option" for="bolt-44"><input type="checkbox" id="bolt-44" class="existing-bolt" value="44" aria-label="Existing balance bolt at position 44"><span>44</span></label><label class="bolt-option" for="bolt-45"><input type="checkbox" id="bolt-45" class="existing-bolt" value="45" aria-label="Existing balance bolt at position 45"><span>45</span></label><label class="bolt-option" for="bolt-46"><input type="checkbox" id="bolt-46" class="existing-bolt" value="46" aria-label="Existing balance bolt at position 46"><span>46</span></label><label class="bolt-option" for="bolt-47"><input type="checkbox" id="bolt-47" class="existing-bolt" value="47" aria-label="Existing balance bolt at position 47"><span>47</span></label><label class="bolt-option" for="bolt-48"><input type="checkbox" id="bolt-48" class="existing-bolt" value="48" aria-label="Existing balance bolt at position 48"><span>48</span></label><label class="bolt-option" for="bolt-49"><input type="checkbox" id="bolt-49" class="existing-bolt" value="49" aria-label="Existing balance bolt at position 49"><span>49</span></label><label class="bolt-option" for="bolt-50"><input type="checkbox" id="bolt-50" class="existing-bolt" value="50" aria-label="Existing balance bolt at position 50"><span>50</span></label><label class="bolt-option" for="bolt-51"><input type="checkbox" id="bolt-51" class="existing-bolt" value="51" aria-label="Existing balance bolt at position 51"><span>51</span></label><label class="bolt-option" for="bolt-52"><input type="checkbox" id="bolt-52" class="existing-bolt" value="52" aria-label="Existing balance bolt at position 52"><span>52</span></label><label class="bolt-option" for="bolt-53"><input type="checkbox" id="bolt-53" class="existing-bolt" value="53" aria-label="Existing balance bolt at position 53"><span>53</span></label><label class="bolt-option" for="bolt-54"><input type="checkbox" id="bolt-54" class="existing-bolt" value="54" aria-label="Existing balance bolt at position 54"><span>54</span></label></div></div></fieldset>
+        <label class="confirmation"><input id="configurationConfirmed" type="checkbox">I confirm that the vibration readings were taken with these balance bolts installed and that they are the type specified in the AMM/AIPC (unit balance effect: 5.76 oz·in).</label>
       </div>
     </div>
     <div class="table-wrap">
@@ -63,57 +63,57 @@
         <thead>
           <tr>
             <th></th>
-            <th>N1 (%)<br><small>76–88 · enteros</small></th>
+            <th>N1 (%)<br><small>76–88 · integers</small></th>
             <th>U (IPS)</th>
             <th>A (°)</th>
           </tr>
         </thead>
         <tbody>
           <tr id="row1">
-            <td class="row-label">Dato 1</td>
-            <td><div class="tcell"><input aria-label="N1 (%), dato 1" id="n1_1" type="text" inputmode="decimal" value="85"></div></td>
-            <td><div class="tcell"><input aria-label="U (IPS), dato 1" id="u_1"  type="text" inputmode="decimal" value="1.10"></div></td>
-            <td><div class="tcell"><input aria-label="A (grados), dato 1" id="a_1"  type="text" inputmode="decimal" value="63"></div></td>
+            <td class="row-label">Reading 1</td>
+            <td><div class="tcell"><input aria-label="N1 (%), reading 1" id="n1_1" type="text" inputmode="decimal" value="85"></div></td>
+            <td><div class="tcell"><input aria-label="U (IPS), reading 1" id="u_1"  type="text" inputmode="decimal" value="1.10"></div></td>
+            <td><div class="tcell"><input aria-label="A (degrees), reading 1" id="a_1"  type="text" inputmode="decimal" value="63"></div></td>
           </tr>
           <tr id="row2">
-            <td class="row-label">Dato 2</td>
-            <td><div class="tcell"><input aria-label="N1 (%), dato 2" id="n1_2" type="text" inputmode="decimal" value="82"></div></td>
-            <td><div class="tcell"><input aria-label="U (IPS), dato 2" id="u_2"  type="text" inputmode="decimal" value="1.05"></div></td>
-            <td><div class="tcell"><input aria-label="A (grados), dato 2" id="a_2"  type="text" inputmode="decimal" value="70"></div></td>
+            <td class="row-label">Reading 2</td>
+            <td><div class="tcell"><input aria-label="N1 (%), reading 2" id="n1_2" type="text" inputmode="decimal" value="82"></div></td>
+            <td><div class="tcell"><input aria-label="U (IPS), reading 2" id="u_2"  type="text" inputmode="decimal" value="1.05"></div></td>
+            <td><div class="tcell"><input aria-label="A (degrees), reading 2" id="a_2"  type="text" inputmode="decimal" value="70"></div></td>
           </tr>
           <tr id="row3">
-            <td class="row-label">Dato 3</td>
-            <td><div class="tcell"><input aria-label="N1 (%), dato 3" id="n1_3" type="text" inputmode="decimal" value="79"></div></td>
-            <td><div class="tcell"><input aria-label="U (IPS), dato 3" id="u_3"  type="text" inputmode="decimal" value="1.00"></div></td>
-            <td><div class="tcell"><input aria-label="A (grados), dato 3" id="a_3"  type="text" inputmode="decimal" value="75"></div></td>
+            <td class="row-label">Reading 3</td>
+            <td><div class="tcell"><input aria-label="N1 (%), reading 3" id="n1_3" type="text" inputmode="decimal" value="79"></div></td>
+            <td><div class="tcell"><input aria-label="U (IPS), reading 3" id="u_3"  type="text" inputmode="decimal" value="1.00"></div></td>
+            <td><div class="tcell"><input aria-label="A (degrees), reading 3" id="a_3"  type="text" inputmode="decimal" value="75"></div></td>
           </tr>
         </tbody>
       </table>
-      <div style="padding:8px 0 0 0"><button class="btn" id="calcBtn">Calcular</button></div>
+      <div style="padding:8px 0 0 0"><button class="btn" id="calcBtn">Calculate</button></div>
     </div>
   </section>
 
   <section>
-    <h2><span>Corrección y distribución</span><small>02 / RESULTADO</small></h2>
+    <h2><span>Balance correction and layout</span><small>02 / RESULT</small></h2>
     <div class="result">
-      <div class="card"><h3>Consistencia (ΔM, Δθ)</h3><div class="big mono" id="outChk">—</div></div>
-      <div class="card"><h3>Resultante / Corrección</h3><div class="big mono" id="outCorr">—</div></div>
-      <div class="card"><h3>Corrección calculada</h3><div class="big mono" id="outCombo">—</div></div>
+      <div class="card"><h3>Data consistency (ΔM, Δθ)</h3><div class="big mono" id="outChk">—</div></div>
+      <div class="card"><h3>Balance target</h3><div class="big mono" id="outCorr">—</div></div>
+      <div class="card"><h3>Calculated final configuration</h3><div class="big mono" id="outCombo">—</div></div>
     </div>
-    <div id="existingReport" class="existing-report" role="status" aria-live="polite">Selecciona si hay pernos instalados y pulsa Calcular.</div>
-    <details class="calculation-details"><summary>Coeficientes y cálculo por lectura</summary><p id="calculationDetail"></p><p>K en oz·in/IPS. Coeficientes: figuras 71-00-00-991-26100-22-A (Flight) y 71-00-00-991-26200-22-A (Ground).</p></details>
-    <div class="diagram-heading"><span>Distribución de pernos</span><span>Vista frontal · ↺ Antihorario</span></div>
-<canvas id="rotor" width="1000" height="1000" aria-label="Distribución de 54 posiciones, numeradas en sentido antihorario desde la posición 1 superior"></canvas>
-<div class="legend"><span><i class="bolt"></i>Corrección calculada</span><span><i class="existing"></i>Existentes (cuadrados)</span><span><i class="overlap"></i>Coincidencia (anillo)</span><span><i class="vector"></i>Vector de corrección</span></div>
+    <div id="existingReport" class="existing-report" role="status" aria-live="polite">Select whether balance bolts are installed, then select Calculate.</div>
+    <details class="calculation-details"><summary>Coefficients and calculation by reading</summary><p id="calculationDetail"></p><p>K in oz·in/IPS. Coefficients: figures 71-00-00-991-26100-22-A (Flight) and 71-00-00-991-26200-22-A (Ground).</p></details>
+    <div class="diagram-heading"><span>Balance bolt layout</span><span>Front view · ↺ Counterclockwise</span></div>
+<canvas id="rotor" width="1000" height="1000" aria-label="54 positions numbered counterclockwise from position 1 at the top"></canvas>
+<div class="legend"><span><i class="bolt"></i>Final configuration</span><span><i class="existing"></i>Remove (squares)</span><span><i class="overlap"></i>Retain (ring)</span><span><i class="vector"></i>Target vector VT / VD</span></div>
   </section>
 </main>
 <footer class="wrap">
-  <strong>Diseñado por <span id="authorName">Jaime A. Botero</span></strong>
-  <p>Herramienta de apoyo al cálculo de mantenimiento con los datos de la copia del AMM indicada abajo. Verificar su vigencia y aplicabilidad al avión/motor antes del uso.</p>
-  <p>Referencia documental: Airbus A330/A340 AMM · TASK 71-00-00-700-848-A · Test No.16A<br>
+  <strong>Designed by <span id="authorName">Jaime A. Botero</span></strong>
+  <p>Maintenance calculation aid using the AMM reference below. Verify the revision and its applicability to the aircraft/engine before use.</p>
+  <p>Document reference: Airbus A330/A340 AMM · TASK 71-00-00-700-848-A · Test No.16A<br>
   The LP Compressor Rotor Trim Balance Procedure Calculated From In-flight or Ground Run Vibration Data (Single Shot Fan Trim Balance).<br>
-  Copia consultada: personalización TPA · Revisión 5 · 01-Jul-2026.</p>
-  <details><summary>Alcance del cálculo</summary><p>Ground: tres lecturas. Flight: una lectura. N1: valores tabulados de 76 a 88 %, sin interpolación. Selección de combinaciones acumulativas A/B con preferencia por subcorrección. Las combinaciones alternativas del apartado 4.C y la redistribución de pesos existentes de la figura 71-00-00-991-18300-22-A, detalle 2, requieren evaluación aparte. La app no comprueba las condiciones mecánicas, la instalación ni la aceptación posterior del motor.</p></details>
+  Reference copy: TPA customization · Revision 5 · 01-Jul-2026.</p>
+  <details><summary>Calculation scope</summary><p>Ground: three readings. Flight: one reading. N1: tabulated values from 76 to 88%, without interpolation. Cumulative A/B combinations are selected with a preference for undercorrection. With existing bolts, VE + VD = VT is calculated by summing each position, per figure 71-00-00-991-18300-22-A, detail 2. Alternative non-cumulative combinations in section 4.C require separate evaluation. Final selection is limited to the implemented cumulative A/B rows; no layout is issued if the target is outside that range. The app does not verify mechanical conditions, installation or subsequent engine acceptance.</p></details>
 </footer>
 
 <script src="app.js"></script>

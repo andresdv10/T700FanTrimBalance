@@ -8,8 +8,8 @@ function toNumber(v){
 function getNum(id, name, min=-Infinity, max=Infinity){
   const el = document.getElementById(id);
   const n = toNumber(el.value);
-  if(!isFinite(n) || isNaN(n)) throw new Error(`"${name}" no es un número válido.`);
-  if(n<min || n>max) throw new Error(`"${name}" fuera de rango (${min}..${max}).`);
+  if(!isFinite(n) || isNaN(n)) throw new Error(`"${name}" is not a valid number.`);
+  if(n<min || n>max) throw new Error(`"${name}" outside the allowed range (${min}..${max}).`);
   return n;
 }
 function showError(msg){
@@ -54,7 +54,7 @@ const TABLE_B=[
 const $=(id)=>document.getElementById(id);
 function lookupKbeta(mode,n1){
   const row=KBETA[mode].find(r=>r.n1===n1);
-  if(!row) throw new Error("N1 debe ser un valor entero tabulado entre 76 y 88 %. No se aplica interpolación ni aproximación.");
+  if(!row) throw new Error("N1 must be a tabulated integer from 76 to 88%. Interpolation and nearest-value approximation are not applied.");
   return row;
 }
 function norm(a){ a%=360; if(a<0)a+=360; return a; }
@@ -64,28 +64,46 @@ function fromVec(x,y){ const mag=Math.hypot(x,y); let deg=Math.atan2(y,x)*180/Ma
 function chooseCombo(table,M){ let best=null; for(const row of table){ if(row.cum<=M) best=row; } return best; }
 function wrap(i,m){ i%=m; if(i<0)i+=m; return i; }
 
-// Registro y comparación; no altera el cálculo de corrección.
-function parseExistingPositions(value){
-  if(!value.trim()) throw new Error("Indica las posiciones de los pernos existentes.");
-  const parts=value.trim().split(/[,;\s]+/);
-  if(parts.some(v=>!/^\d+$/.test(v) || Number(v)<1 || Number(v)>54))
-    throw new Error("Usa posiciones enteras de 1 a 54, separadas por comas, sin rangos.");
-  const positions=parts.map(Number);
-  if(new Set(positions).size!==positions.length) throw new Error("Hay posiciones repetidas. Registra cada posición una sola vez.");
-  return positions.sort((a,b)=>a-b);
+// AMM figura 71-00-00-991-18300-22-A, detalle 2: VE + VD = VT.
+// Efecto unitario 5,76 oz·in: tabla A, N=0, figura 18400, hoja 1.
+function existingVector(positions){
+  let x=0,y=0;
+  for(const position of positions){
+    const v=toVec(TABLE_A[0].eff,(position-1)*360/54);
+    x+=v.x; y+=v.y;
+  }
+  return {x,y,...fromVec(x,y)};
+}
+function configurationChanges(existing,final){
+  return {
+    keep:existing.filter(p=>final.includes(p)),
+    remove:existing.filter(p=>!final.includes(p)),
+    install:final.filter(p=>!existing.includes(p))
+  };
+}
+
+// Registro de los pernos que estaban instalados durante la medición.
+function selectedBolts(){
+  return Array.from(document.querySelectorAll(".existing-bolt:checked"),box=>Number(box.value)).sort((a,b)=>a-b);
+}
+function updateBoltSelection(){
+  $("selectedCount").textContent=`${selectedBolts().length} selected`;
+  $("configurationConfirmed").checked=false;
+  clearError(); resetResult();
 }
 function resetResult(){
   for(const id of ["outChk","outCorr","outCombo"]) $(id).textContent="—";
   $("calculationDetail").textContent="";
-  $("existingReport").textContent="Datos pendientes de cálculo. Revisa la configuración y pulsa Calcular.";
+  $("existingReport").textContent="Calculation pending. Check the configuration and select Calculate.";
   $("existingReport").className="existing-report";
   const c=$("rotor"); c.getContext("2d").clearRect(0,0,c.width,c.height);
 }
 function readExisting(){
-  if(!["yes","no"].includes($("hasExisting").value)) throw new Error("Selecciona si hay pernos de balance instalados.");
+  if(!["yes","no"].includes($("hasExisting").value)) throw new Error("Select whether balance bolts are already installed.");
   if($("hasExisting").value==="no") return [];
-  const positions=parseExistingPositions($("existingPositions").value);
-  if(!$("configurationConfirmed").checked) throw new Error("Confirma que las lecturas corresponden a la configuración de pernos registrada.");
+  const positions=selectedBolts();
+  if(!positions.length) throw new Error("Select at least one existing balance bolt position.");
+  if(!$("configurationConfirmed").checked) throw new Error("Confirm that the readings correspond to the selected balance bolt configuration.");
   return positions;
 }
 
@@ -97,7 +115,7 @@ function calcular(){
     const existing=readExisting();
     const mode=$("mode").value;
     const mod=54;
-    if(!["flight","ground"].includes(mode)) throw new Error("Selecciona un modo válido.");
+    if(!["flight","ground"].includes(mode)) throw new Error("Select a valid operating mode.");
 
     const r1={n:getNum("n1_1","N1‑1", 76,88), u:getNum("u_1","U‑1", 0), a:getNum("a_1","A‑1", 0, 360)};
     const r2=mode==="ground" ? {n:getNum("n1_2","N1‑2", 76,88), u:getNum("u_2","U‑2", 0), a:getNum("a_2","A‑2", 0, 360)} : null;
@@ -112,7 +130,7 @@ function calcular(){
       const M = r1.u * kb.K;
       const ang = norm(r1.a + kb.B);
       Mcorr = M; AngCorr = ang;
-      detail.push(`Dato 1: N1 ${r1.n}% · K ${kb.K} · β ${kb.B}° · U×K ${M.toFixed(3)} oz·in · A+β ${ang.toFixed(3)}°`);
+      detail.push(`Reading 1: N1 ${r1.n}% · K ${kb.K} · β ${kb.B}° · U×K ${M.toFixed(3)} oz·in · A+β ${ang.toFixed(3)}°`);
     }else{
       // Ground Run (3 datos): R/3
       const runs=[r1,r2,r3];
@@ -121,7 +139,7 @@ function calcular(){
         const kb=lookupKbeta("ground", r.n);
         const Mi=r.u*kb.K;
         const thetai=norm(r.a+kb.B);
-        detail.push(`Dato ${detail.length+1}: N1 ${r.n}% · K ${kb.K} · β ${kb.B}° · U×K ${Mi.toFixed(3)} oz·in · A+β ${thetai.toFixed(3)}°`);
+        detail.push(`Reading ${detail.length+1}: N1 ${r.n}% · K ${kb.K} · β ${kb.B}° · U×K ${Mi.toFixed(3)} oz·in · A+β ${thetai.toFixed(3)}°`);
         vecs.push(toVec(Mi,thetai)); mags.push(Mi); angs.push(thetai);
       }
       const Mmin=Math.min(...mags), Mmax=Math.max(...mags);
@@ -131,7 +149,7 @@ function calcular(){
       // Se deriva a revisión cuando la dispersión cruza la referencia 0°.
       const span=Amax-Amin;
       if(span>180){
-        throw new Error("Las posiciones angulares cruzan la referencia de 0° o presentan una dispersión amplia. Revisar el diagrama vectorial según AMM 4.B; esta app no emite una distribución automática para este caso.");
+        throw new Error("The angular positions cross the 0° reference or have a wide spread. Review the vector diagram per AMM 4.B; this app does not issue an automatic layout for this case.");
       }
       inconsistent=(Mmax-Mmin)>=40 || span>=30;
 
@@ -140,13 +158,26 @@ function calcular(){
       Mcorr=R.mag/3; AngCorr=R.deg;
     }
 
-    if(!Number.isFinite(Mcorr) || !Number.isFinite(AngCorr)) throw new Error("El cálculo excede la precisión numérica disponible. Revisa las entradas.");
+    if(!Number.isFinite(Mcorr) || !Number.isFinite(AngCorr)) throw new Error("The calculation exceeds the available numerical precision. Check the inputs.");
     $("calculationDetail").textContent=detail.join("\n");
 
-    // El AMM 4.B.(3) exige variaciones inferiores a 40 oz·in y 30°.
+    // AMM 4.B.(3) requires variaciones inferiores a 40 oz·in y 30°.
     if(mode==="ground" && inconsistent){
-      throw new Error(`Datos inconsistentes: ΔM=${deltaM} oz·in; Δθ=${deltaA}°. El AMM 4.B.(3) exige ΔM < 40 oz·in y Δθ < 30°. El AMM indica lubricar las raíces de los álabes (TASK 72-31-41-300-802) y repetir la recogida de datos. No se emite una distribución de pernos.`);
+      throw new Error(`Inconsistent data: ΔM=${deltaM} oz·in; Δθ=${deltaA}°. AMM 4.B.(3) requires ΔM < 40 oz·in y Δθ < 30°. The AMM specifies blade-root lubrication (TASK 72-31-41-300-802) and repeat data collection. No bolt layout is issued.`);
     }
+
+    const correction={mag:Mcorr,deg:AngCorr};
+    const ve=existingVector(existing);
+    const vd=toVec(Mcorr,AngCorr);
+    const vt=existing.length ? fromVec(ve.x+vd.x,ve.y+vd.y) : correction;
+    Mcorr=vt.mag; AngCorr=vt.deg;
+    detail.push(`VD (readings): ${correction.mag.toFixed(3)} oz·in @ ${correction.deg.toFixed(3)}°`);
+    if(existing.length){
+      detail.push(`VE (existing bolts): ${ve.mag.toFixed(3)} oz·in${ve.mag<1e-10 ? " · angle not meaningful" : ` @ ${ve.deg.toFixed(3)}°`}`);
+      detail.push(`VT = VE + VD: ${vt.mag.toFixed(3)} oz·in @ ${vt.deg.toFixed(3)}°`);
+      detail.push("VT is the target for the total configuration, not an addition to the existing bolts. Unit balance effect: 5.76 oz·in per balance bolt, per Table A.");
+    }
+    $("calculationDetail").textContent=detail.join("\n");
 
     // Hole vs Space
     const step=360/mod;
@@ -161,10 +192,10 @@ function calcular(){
 
     const table=isHole?TABLE_A:TABLE_B;
     if(Mcorr<table[0].cum || Mcorr>table[table.length-1].cum){
-      throw new Error(`Corrección calculada: ${Mcorr.toFixed(2)} oz·in @ ${AngCorr.toFixed(1)}°. Fuera del intervalo de combinaciones acumulativas que utiliza esta app (${table[0].cum.toFixed(2)} a ${table[table.length-1].cum.toFixed(2)} oz·in). Requiere evaluar una combinación según el AMM; no se emite una distribución automática.`);
+      throw new Error(`Target ${existing.length ? "total VT" : "VD"}: ${Mcorr.toFixed(2)} oz·in @ ${AngCorr.toFixed(1)}°. Outside the cumulative-combination range implemented in this app (${table[0].cum.toFixed(2)} to ${table[table.length-1].cum.toFixed(2)} oz·in). Evaluate a combination per the AMM; no automatic layout is issued.`);
     }
     const row=chooseCombo(table, Mcorr);
-    if(!row) throw new Error("No hay una combinación acumulativa sin sobrecorrección dentro del método implementado.");
+    if(!row) throw new Error("No cumulative combination without overcorrection is available within the implemented method.");
     const w=row.w;
 
     // Posiciones
@@ -186,11 +217,7 @@ function calcular(){
       ? `ΔM=${deltaM} oz·in · Δθ=${deltaA}°`
       : `Single shot (In‑Flight)`;
 
-    if(mode==="ground"){
-      document.getElementById("outCorr").textContent = `R/3 = ${Mcorr.toFixed(2)} oz·in @ ${AngCorr.toFixed(1)}°`;
-    }else{
-      document.getElementById("outCorr").textContent = `M = ${Mcorr.toFixed(2)} oz·in @ ${AngCorr.toFixed(1)}°`;
-    }
+    $("outCorr").textContent = `${existing.length ? "VT = VE + VD" : "VD"} = ${Mcorr.toFixed(3)} oz·in @ ${AngCorr.toFixed(3)}°`;
 
     const ranges=[];
     for(const label of labels){
@@ -198,20 +225,20 @@ function calcular(){
       if(last && label===last[1]+1) last[1]=label;
       else ranges.push([label,label]);
     }
-    const location=ranges.map(([start,end])=>start===end ? `la posición ${start}` : `las posiciones ${start} y ${end}`).join(" y entre ");
-    const installation=labels.length===1 ? `Instalar 1 perno en la posición ${labels[0]}.` : `Instalar ${w} pernos entre ${location}, incluidos los extremos.`;
-    document.getElementById("outCombo").textContent = `${existing.length ? installation.replace("Instalar ","Corrección calculada: ") : installation}\nSentido antihorario · Vista frontal\n${isHole?"Hole‑centered":"Space‑centered"} · Momento tabulado: ${row.cum.toFixed(2)} oz·in\nDiferencia de magnitud: ${(Mcorr-row.cum).toFixed(3)} oz·in (no es un límite de aceptación)`;
+    const location=ranges.map(([start,end])=>start===end ? `position ${start}` : `positions ${start}–${end}`).join(" and ");
+    const installation=labels.length===1 ? `1 balance bolt at position ${labels[0]}.` : `${w} balance bolts at ${location}, inclusive.`;
+    $("outCombo").textContent = `Calculated final configuration: ${installation}\nCounterclockwise · Front view\n${isHole?"Hole-centered":"Space-centered"} · Tabulated moment: ${row.cum.toFixed(2)} oz·in\nMagnitude difference: ${(Mcorr-row.cum).toFixed(3)} oz·in (not an acceptance limit)`;
 
-    const overlaps=labels.filter(position=>existing.includes(position));
+    const changes=configurationChanges(existing,labels);
+    const list=positions=>positions.length ? positions.join(", ") : "none";
     const report=$("existingReport");
-    if(existing.length){
-      const state=`Registrados: ${existing.length} pernos existentes. Posiciones: ${existing.join(", ")}.`;
-      report.textContent=overlaps.length
-        ? `${state}\nCoincidencia en posiciones: ${overlaps.join(", ")}. La corrección calculada incluye posiciones ya ocupadas; requiere evaluar una combinación alternativa según el apartado 4.C del AMM (SUBTASK 71-00-00-420-088-A). No se ha determinado una configuración final de instalación.`
-        : `${state}\nNo hay coincidencias de posición con la corrección calculada. Esta comprobación solo detecta posiciones ocupadas; no determina ni valida una configuración final.`;
-      report.textContent+="\nNo se calculan retiradas ni redistribuciones de los pernos existentes.";
-      report.className=overlaps.length ? "existing-report conflict" : "existing-report";
-    }else report.textContent="Sin pernos de balance existentes registrados.";
+    report.className="existing-report";
+    report.textContent=`Balance bolts in the final configuration: ${labels.length}. Positions: ${labels.join(", ")}.\n`+
+      `Retain (${changes.keep.length}): ${list(changes.keep)}.\n`+
+      `Remove balance bolts (${changes.remove.length}): ${list(changes.remove)}.\n`+
+      `Install balance bolts (${changes.install.length}): ${list(changes.install)}.`;
+    if(existing.length) report.textContent+="\nThis is the calculated total configuration; do not add the complete set to the existing weights. Retain identifies existing positions that are also part of the final configuration.";
+    report.textContent+="\nChange bolts one at a time and complete installation and checks per AMM 4.C and AIPC 72-35-41-60. Removing a balance bolt does not mean leaving the location without the required replacement hardware.";
     draw(AngCorr, idx, mod, existing.map(position=>position-1));
   }catch(err){
     showError(err.message || String(err));
@@ -257,7 +284,7 @@ function draw(angleDeg, posIdxList, mod, existingIdx=[]){
   ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(a)*r, cy+Math.sin(a)*r);
   ctx.strokeStyle="#f8fafc"; ctx.lineWidth=3; ctx.stroke();
   ctx.fillStyle="#a7bdd9"; ctx.textAlign="center"; ctx.font="20px system-ui";
-  ctx.fillText("VISTA FRONTAL",cx,cy-30);
+  ctx.fillText("FRONT VIEW",cx,cy-30);
 }
 
 // -------- UX: alternar 1 dato vs 3 datos + presets ----------
@@ -311,7 +338,11 @@ $("hasExisting").addEventListener("change",()=>{
   $("configurationConfirmed").checked=false;
   clearError(); resetResult();
 });
-$("existingPositions").addEventListener("input",()=>{$("configurationConfirmed").checked=false;clearError();resetResult();});
+document.querySelectorAll(".existing-bolt").forEach(box=>box.addEventListener("change",updateBoltSelection));
+$("clearBolts").addEventListener("click",()=>{
+  document.querySelectorAll(".existing-bolt").forEach(box=>{box.checked=false;});
+  updateBoltSelection();
+});
 $("configurationConfirmed").addEventListener("change",()=>{clearError();resetResult();});
 for(const id of ["mode","n1_1","n1_2","n1_3","u_1","u_2","u_3","a_1","a_2","a_3"]){
   $(id).addEventListener(id==="mode"?"change":"input",()=>{clearError();resetResult();});
