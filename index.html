@@ -4,92 +4,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fan trim balance RR T700</title>
-<style>
-  :root{
-    --bg:#0b1020; --panel:#0f1a2d; --ink:#eaf2ff; --muted:#a7bdd9;
-    --line:#1c2b44; --accent:#58c7ff; --warn:#ffd166; --hot:#ff6b6b; --err:#ff6b6b;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--ink);
-       font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial}
-  header{position:sticky;top:0;background:#0b1427e6;backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:5}
-  .wrap{max-width:820px;margin:0 auto;padding:10px 16px}
-  h1{margin:0;font-size:18px}
-  /* Header layout */
-  .brand{display:flex;align-items:center;gap:10px}
-  .logo{width:28px;height:28px;display:inline-block}
-  .subtitle{color:#9bb7e5;font-size:12px;margin-top:-2px}
-  section{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:14px 0;overflow:hidden}
-  section>h2{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);font-size:16px;display:flex;align-items:center;justify-content:space-between}
-  .grid{display:grid;grid-template-columns:1fr;gap:12px;padding:14px}
-  label{color:var(--muted);font-size:13px}
-  input,select{width:100%;background:#0e1526;color:var(--ink);
-               border:1px solid #233454;border-radius:12px;padding:12px 14px;
-               font-size:16px; -webkit-appearance:none; appearance:none}
-  input[type=number], input[type=text]{font-variant-numeric:tabular-nums}
-  .btn{width:100%;display:inline-flex;justify-content:center;align-items:center;gap:10px;
-       background:linear-gradient(180deg,#173256,#122847);border:1px solid #244468;
-       padding:14px 16px;border-radius:12px;color:var(--ink);font-weight:700;font-size:18px;cursor:pointer}
-  .btn:active{transform:scale(.995)}
-  .result{display:grid;grid-template-columns:1fr;gap:10px;padding:14px;background:#0c172a;border-top:1px dashed var(--line)}
-  .card{background:#0e1a2f;border:1px solid var(--line);border-radius:12px;padding:12px}
-  .card h3{margin:0 0 6px 0;font-size:13px;color:#c2d6f2}
-  .big{font-size:22px;font-weight:800;letter-spacing:.3px}
-  canvas{width:100%;max-width:620px;height:auto;aspect-ratio:1/1;display:block;margin:14px auto;border:1px solid var(--line);border-radius:14px;background:#0a1426}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-  .err{padding:10px 14px;margin:10px 14px;background:#2a0f15;border:1px solid #6b111c;color:#ffdfe2;border-radius:12px;display:none}
-  /* Tabla de datos */
-  .table-wrap{padding:14px}
-  table{width:100%;border-collapse:separate;border-spacing:0 8px}
-  thead th{font-size:12px;color:#c2d6f2;text-align:center;padding:6px}
-  tbody td{padding:0 6px}
-  tbody .row-label{width:1%;white-space:nowrap;color:#aecdff;font-size:12px;padding-left:6px}
-  .tcell{display:flex}
-  .tcell input{width:100%}
-  @media(min-width:720px){
-    .result{grid-template-columns:repeat(3,1fr)}
-  }
-  /* Presets toolbar */
-  .presets{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{padding:8px 10px;border:1px solid #2a4470;border-radius:999px;font-size:13px;cursor:pointer;background:#0f2039}
-  .chip:hover{filter:brightness(1.1)}
-</style>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
 <header>
   <div class="wrap">
     <div class="brand">
       <!-- Simple inline SVG logo placeholder -->
-      <svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="32" cy="32" r="28" fill="#122a4a" stroke="#2f6db0" stroke-width="2"/>
-        <path d="M32 10 L40 32 L32 54 L24 32 Z" fill="#58c7ff"/>
-        <circle cx="32" cy="32" r="5" fill="#0b1020" stroke="#58c7ff" stroke-width="2"/>
-      </svg>
+      <img class="logo" src="assets/logo.png" alt="Jaime B, aircraft mechanic — logo con motor">
       <div>
         <h1>Fan trim balance T700</h1>
-        <div class="subtitle">LP Fan / AMM logic • 54 posiciones</div>
+        <div class="subtitle">ROLLS-ROYCE TRENT 700 · LP COMPRESSOR</div>
       </div>
     </div>
   </div>
 </header>
 
 <main class="wrap">
-  <div id="errorBox" class="err"></div>
+  <div id="errorBox" class="err" role="alert"></div>
 
-  <section>
+  <section class="mode-panel">
     <h2>
       Modo
       <span class="presets" id="presetBar" title="Sugeridos (solo Ground)">
         <!-- chips de presets -->
-        <span class="chip" data-preset="85,82,79">N1: 85 / 82 / 79</span>
-        <span class="chip" data-preset="86,83,80">86 / 83 / 80</span>
-        <span class="chip" data-preset="84,81,78">84 / 81 / 78</span>
+        <button type="button" class="chip" data-preset="85,82,79">N1: 85 / 82 / 79</button>
+        <button type="button" class="chip" data-preset="86,83,80">86 / 83 / 80</button>
+        <button type="button" class="chip" data-preset="84,81,78">84 / 81 / 78</button>
       </span>
     </h2>
     <div class="grid">
       <div>
-        <label>Selecciona el modo</label>
+        <label for="mode">Selecciona el modo</label>
         <select id="mode">
           <option value="ground">Ground Run (3 datos)</option>
           <option value="flight">In‑Flight (1 dato)</option>
@@ -99,7 +46,7 @@
   </section>
 
   <section>
-    <h2>Datos</h2>
+    <h2><span>Datos de vibración</span><small>01 / ENTRADA</small></h2>
     <div class="table-wrap">
       <table>
         <thead>
@@ -113,21 +60,21 @@
         <tbody>
           <tr id="row1">
             <td class="row-label">Dato 1</td>
-            <td><div class="tcell"><input id="n1_1" type="text" inputmode="decimal" value="85"></div></td>
-            <td><div class="tcell"><input id="u_1"  type="text" inputmode="decimal" value="1.10"></div></td>
-            <td><div class="tcell"><input id="a_1"  type="text" inputmode="decimal" value="63"></div></td>
+            <td><div class="tcell"><input aria-label="N1 (%), dato 1" id="n1_1" type="text" inputmode="decimal" value="85"></div></td>
+            <td><div class="tcell"><input aria-label="U (IPS), dato 1" id="u_1"  type="text" inputmode="decimal" value="1.10"></div></td>
+            <td><div class="tcell"><input aria-label="A (grados), dato 1" id="a_1"  type="text" inputmode="decimal" value="63"></div></td>
           </tr>
           <tr id="row2">
             <td class="row-label">Dato 2</td>
-            <td><div class="tcell"><input id="n1_2" type="text" inputmode="decimal" value="82"></div></td>
-            <td><div class="tcell"><input id="u_2"  type="text" inputmode="decimal" value="1.05"></div></td>
-            <td><div class="tcell"><input id="a_2"  type="text" inputmode="decimal" value="70"></div></td>
+            <td><div class="tcell"><input aria-label="N1 (%), dato 2" id="n1_2" type="text" inputmode="decimal" value="82"></div></td>
+            <td><div class="tcell"><input aria-label="U (IPS), dato 2" id="u_2"  type="text" inputmode="decimal" value="1.05"></div></td>
+            <td><div class="tcell"><input aria-label="A (grados), dato 2" id="a_2"  type="text" inputmode="decimal" value="70"></div></td>
           </tr>
           <tr id="row3">
             <td class="row-label">Dato 3</td>
-            <td><div class="tcell"><input id="n1_3" type="text" inputmode="decimal" value="79"></div></td>
-            <td><div class="tcell"><input id="u_3"  type="text" inputmode="decimal" value="1.00"></div></td>
-            <td><div class="tcell"><input id="a_3"  type="text" inputmode="decimal" value="75"></div></td>
+            <td><div class="tcell"><input aria-label="N1 (%), dato 3" id="n1_3" type="text" inputmode="decimal" value="79"></div></td>
+            <td><div class="tcell"><input aria-label="U (IPS), dato 3" id="u_3"  type="text" inputmode="decimal" value="1.00"></div></td>
+            <td><div class="tcell"><input aria-label="A (grados), dato 3" id="a_3"  type="text" inputmode="decimal" value="75"></div></td>
           </tr>
         </tbody>
       </table>
@@ -136,226 +83,25 @@
   </section>
 
   <section>
-    <h2>Resultados</h2>
+    <h2><span>Corrección y distribución</span><small>02 / RESULTADO</small></h2>
     <div class="result">
       <div class="card"><h3>Consistencia (ΔM, Δθ)</h3><div class="big mono" id="outChk">—</div></div>
       <div class="card"><h3>Resultante / Corrección</h3><div class="big mono" id="outCorr">—</div></div>
       <div class="card"><h3>Tipo / Combinación</h3><div class="big mono" id="outCombo">—</div></div>
     </div>
-    <canvas id="rotor" width="700" height="700"></canvas>
+    <div class="diagram-heading"><span>Distribución de pernos</span><span>Vista frontal · ↺ Antihorario</span></div>
+<canvas id="rotor" width="1000" height="1000" aria-label="Distribución de 54 posiciones, numeradas en sentido antihorario desde la posición 1 superior"></canvas>
+<div class="legend"><span><i class="bolt"></i>Pernos seleccionados</span><span><i class="vector"></i>Vector de corrección</span></div>
   </section>
 </main>
+<footer class="wrap">
+  <strong>Diseñado por <span id="authorName">Jaime A. Botero</span></strong>
+  <p>Herramienta de apoyo para uso de mantenimiento bajo los parámetros establecidos en el AMM aplicable.</p>
+  <p>Referencia documental: Airbus A330/A340 AMM · TASK 71-00-00-700-848-A · Test No.16A<br>
+  The LP Compressor Rotor Trim Balance Procedure Calculated From In-flight or Ground Run Vibration Data (Single Shot Fan Trim Balance).<br>
+  Copia consultada: personalización TPA · Revisión 5 · 01-Jul-2026.</p>
+</footer>
 
-<script>
-// -------- Utilidades de entrada ----------
-function toNumber(v){
-  if(typeof v!=="string") return Number(v);
-  v = v.trim().replace(/\s+/g,"").replace(",", ".").replace(/[^0-9\.\-\+eE]/g,"");
-  return Number(v);
-}
-function getNum(id, name, min=-Infinity, max=Infinity){
-  const el = document.getElementById(id);
-  const n = toNumber(el.value);
-  if(!isFinite(n) || isNaN(n)) throw new Error(`"${name}" no es un número válido.`);
-  if(n<min || n>max) throw new Error(`"${name}" fuera de rango (${min}..${max}).`);
-  return n;
-}
-function showError(msg){
-  const box = document.getElementById("errorBox");
-  box.style.display = "block"; box.textContent = msg;
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-function clearError(){ const box = document.getElementById("errorBox"); box.style.display="none"; box.textContent=""; }
-
-// -------- Datos AMM ----------
-const KBETA={
-  flight:[
-    {n1:88,K:60.0,B:125},{n1:87,K:60.1,B:129},{n1:86,K:61.1,B:134},{n1:85,K:62.1,B:139},
-    {n1:84,K:65.1,B:145},{n1:83,K:68.1,B:151},{n1:82,K:71.6,B:157},{n1:81,K:75.6,B:164},
-    {n1:80,K:79.5,B:170},{n1:79,K:83.5,B:175},{n1:78,K:87.4,B:180},{n1:77,K:91.2,B:183},
-    {n1:76,K:94.8,B:185},
-  ],
-  ground:[
-    {n1:88,K:131.0,B:125},{n1:87,K:131.1,B:124},{n1:86,K:127.6,B:122},{n1:85,K:124.1,B:121},
-    {n1:84,K:123.3,B:121},{n1:83,K:122.5,B:122},{n1:82,K:122.2,B:122},{n1:81,K:122.4,B:124},
-    {n1:80,K:122.6,B:126},{n1:79,K:126.8,B:133},{n1:78,K:131.0,B:140},{n1:77,K:137.4,B:145},
-    {n1:76,K:145.7,B:147},
-  ]
-};
-const TABLE_A=[
-  {N:0,eff:5.76,cum:5.76,w:1},{N:1,eff:11.44,cum:17.20,w:3},{N:2,eff:11.21,cum:28.41,w:5},
-  {N:3,eff:10.83,cum:39.24,w:7},{N:4,eff:10.29,cum:49.53,w:9},{N:5,eff:9.63,cum:59.16,w:11},
-  {N:6,eff:8.83,cum:67.99,w:13},{N:7,eff:7.90,cum:75.89,w:15},{N:8,eff:6.88,cum:82.77,w:17},
-  {N:9,eff:5.76,cum:88.53,w:19},{N:10,eff:4.56,cum:93.09,w:21},{N:11,eff:3.31,cum:96.40,w:23},
-  {N:12,eff:2.00,cum:98.40,w:25},{N:13,eff:0.67,cum:99.07,w:27},
-];
-const TABLE_B=[
-  {N:0.5,cum:11.50,w:2},{N:1.5,cum:22.85,w:4},{N:2.5,cum:33.89,w:6},{N:3.5,cum:44.47,w:8},
-  {N:4.5,cum:54.45,w:10},{N:5.5,cum:63.69,w:12},{N:6.5,cum:72.07,w:14},{N:7.5,cum:79.48,w:16},
-  {N:8.5,cum:85.81,w:18},{N:9.5,cum:90.98,w:20},{N:10.5,cum:94.92,w:22},{N:11.5,cum:97.58,w:24},
-  {N:12.5,cum:98.92,w:26},
-];
-
-// -------- Utilidades numéricas ----------
-const $=(id)=>document.getElementById(id);
-function nearestKbeta(mode,n1){ const arr=KBETA[mode]; let best=arr[0], d=Math.abs(arr[0].n1-n1); for(const r of arr){ const dd=Math.abs(r.n1-n1); if(dd<d){d=dd; best=r;} } return best; }
-function norm(a){ a%=360; if(a<0)a+=360; return a; }
-function toVec(mag,deg){ const rad=deg*Math.PI/180; return {x:mag*Math.cos(rad), y:mag*Math.sin(rad)}; }
-function fromVec(x,y){ const mag=Math.hypot(x,y); let deg=Math.atan2(y,x)*180/Math.PI; return {mag, deg:norm(deg)}; }
-function chooseCombo(table,M){ let best=table[0]; for(const row of table){ if(row.cum<=M+1e-9) best=row; } return best; }
-function wrap(i,m){ i%=m; if(i<0)i+=m; return i; }
-
-// -------- Cálculo ----------
-function calcular(){
-  try{
-    clearError();
-    const mode=$("mode").value;
-    const mod=54;
-
-    const r1={n:getNum("n1_1","N1‑1", 60,100), u:getNum("u_1","U‑1", 0, 9), a:getNum("a_1","A‑1", 0, 360)};
-    const r2={n:getNum("n1_2","N1‑2", 60,100), u:getNum("u_2","U‑2", 0, 9), a:getNum("a_2","A‑2", 0, 360)};
-    const r3={n:getNum("n1_3","N1‑3", 60,100), u:getNum("u_3","U‑3", 0, 9), a:getNum("a_3","A‑3", 0, 360)};
-
-    let Mcorr, AngCorr, deltaM="—", deltaA="—";
-
-    if(mode==="flight"){
-      // In‑Flight (single shot)
-      const kb=nearestKbeta("flight", r1.n);
-      const M = r1.u * kb.K;
-      const ang = norm(r1.a + kb.B);
-      Mcorr = M; AngCorr = ang;
-    }else{
-      // Ground Run (3 datos): R/3
-      const runs=[r1,r2,r3];
-      const vecs=[], mags=[], angs=[];
-      for(const r of runs){
-        const kb=nearestKbeta("ground", r.n);
-        const Mi=r.u*kb.K;
-        const thetai=norm(r.a+kb.B);
-        vecs.push(toVec(Mi,thetai)); mags.push(Mi); angs.push(thetai);
-      }
-      const Mmin=Math.min(...mags), Mmax=Math.max(...mags);
-      const Amin=Math.min(...angs), Amax=Math.max(...angs);
-      deltaM=(Mmax-Mmin).toFixed(2); deltaA=(Amax-Amin).toFixed(1);
-
-      const sumX=vecs.reduce((s,v)=>s+v.x,0), sumY=vecs.reduce((s,v)=>s+v.y,0);
-      const R=fromVec(sumX,sumY);
-      Mcorr=R.mag/3; AngCorr=R.deg;
-    }
-
-    // Hole vs Space
-    const step=360/mod;
-    const tol=Math.min(0.2, step/20);
-    const distToGrid=Math.min(
-      Math.abs(AngCorr - Math.round(AngCorr/step)*step),
-      Math.abs((AngCorr+360) - Math.round((AngCorr+360)/step)*step)
-    );
-    const isHole = distToGrid <= tol;
-
-    const row=chooseCombo(isHole?TABLE_A:TABLE_B, Mcorr);
-    const w=row.w;
-
-    // Posiciones
-    let idx=[];
-    if(isHole){
-      const base=Math.round(AngCorr/step)%mod;
-      idx=[base]; const pairs=(w-1)/2;
-      for(let i=1;i<=pairs;i++){ idx.push(wrap(base+i,mod)); idx.push(wrap(base-i,mod)); }
-    }else{
-      const left=Math.floor(AngCorr/step)%mod; const right=wrap(left+1,mod);
-      const pairs=w/2; idx=[];
-      for(let i=0;i<pairs;i++){ idx.push(wrap(left-i,mod)); idx.push(wrap(right+i,mod)); }
-    }
-    idx.sort((a,b)=>a-b);
-    const labels = idx.map(i=>i+1);
-
-    // Salida resumida
-    document.getElementById("outChk").textContent = (mode==="ground")
-      ? `ΔM=${deltaM} oz·in · Δθ=${deltaA}°`
-      : `Single shot (In‑Flight)`;
-
-    if(mode==="ground"){
-      document.getElementById("outCorr").textContent = `R/3 = ${Mcorr.toFixed(2)} oz·in @ ${AngCorr.toFixed(1)}°`;
-    }else{
-      document.getElementById("outCorr").textContent = `M = ${Mcorr.toFixed(2)} oz·in @ ${AngCorr.toFixed(1)}°`;
-    }
-
-    document.getElementById("outCombo").textContent = `${isHole?"Hole‑centered":"Space‑centered"} · Pernos: ${w} · Posiciones: ${labels.join(", ")} · Momento total: ${row.cum.toFixed(2)} oz·in`;
-
-    draw(AngCorr, idx, mod);
-  }catch(err){
-    showError(err.message || String(err));
-  }
-}
-
-function draw(angleDeg, posIdxList, mod){
-  const c=document.getElementById("rotor"), ctx=c.getContext("2d");
-  const cx=c.width/2, cy=c.height/2, r=Math.min(c.width,c.height)*0.38;
-  ctx.clearRect(0,0,c.width,c.height);
-
-  // Círculo externo
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.strokeStyle="#2a3d58"; ctx.lineWidth=2; ctx.stroke();
-
-  const step=360/mod;
-
-  // Timing Mark (posición 1)
-  ctx.beginPath(); ctx.moveTo(cx, cy-r-12); ctx.lineTo(cx, cy-r-2);
-  ctx.strokeStyle="#e2e8f0"; ctx.lineWidth=3; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx-6, cy-r-6); ctx.lineTo(cx, cy-r-2); ctx.lineTo(cx+6, cy-r-6);
-  ctx.strokeStyle="#e2e8f0"; ctx.lineWidth=2; ctx.stroke();
-
-  // Pernos (1..54)
-  for(let i=0;i<mod;i++){
-    const ang=(i*step-90)*Math.PI/180;
-    const x=cx+Math.cos(ang)*r, y=cy+Math.sin(ang)*r;
-    const sel=posIdxList.includes(i);
-    ctx.beginPath(); ctx.arc(x,y, sel?10:7, 0, Math.PI*2);
-    ctx.fillStyle=sel?"#ff6b6b":"#a6b8d1"; ctx.fill();
-    ctx.fillStyle="#e6f0ff"; ctx.font="16px ui-monospace";
-    const label=String(i+1);
-    ctx.fillText(label, x-(label.length>1?9:4), y-12);
-  }
-
-  // Vector de corrección
-  const a=(angleDeg-90)*Math.PI/180;
-  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(a)*r, cy+Math.sin(a)*r);
-  ctx.strokeStyle="#ffd166"; ctx.lineWidth=4; ctx.stroke();
-}
-
-// -------- UX: alternar 1 dato vs 3 datos + presets ----------
-function updateRows(){
-  const mode=document.getElementById("mode").value;
-  const r2=document.getElementById("row2");
-  const r3=document.getElementById("row3");
-  const presetBar=document.getElementById("presetBar");
-  if(mode==="flight"){
-    r2.style.display="none"; r3.style.display="none";
-    presetBar.style.visibility="hidden";
-  }else{
-    r2.style.display="table-row"; r3.style.display="table-row";
-    presetBar.style.visibility="visible";
-  }
-}
-
-document.getElementById("mode").addEventListener("change", ()=>{ updateRows(); });
-document.getElementById("calcBtn").addEventListener("click", calcular);
-
-// Presets N1 chips
-document.querySelectorAll(".chip").forEach(ch=>{
-  ch.addEventListener("click", ()=>{
-    const csv = ch.getAttribute("data-preset");
-    const parts = csv.split(",").map(s=>s.trim());
-    if(parts.length===3){
-      document.getElementById("n1_1").value = parts[0];
-      document.getElementById("n1_2").value = parts[1];
-      document.getElementById("n1_3").value = parts[2];
-    }
-  });
-});
-
-// Inicialización
-updateRows();
-try{ calcular(); }catch(_){ /* errores se muestran al pulsar Calcular */ }
-</script>
+<script src="app.js"></script>
 </body>
 </html>
