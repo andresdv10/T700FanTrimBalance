@@ -57,10 +57,36 @@ function fromVec(x,y){ const mag=Math.hypot(x,y); let deg=Math.atan2(y,x)*180/Ma
 function chooseCombo(table,M){ let best=table[0]; for(const row of table){ if(row.cum<=M+1e-9) best=row; } return best; }
 function wrap(i,m){ i%=m; if(i<0)i+=m; return i; }
 
+// Registro y comparación; no altera el cálculo de corrección.
+function parseExistingPositions(value){
+  if(!value.trim()) throw new Error("Indica las posiciones de los pernos existentes.");
+  const parts=value.trim().split(/[,;\s]+/);
+  if(parts.some(v=>!/^\d+$/.test(v) || Number(v)<1 || Number(v)>54))
+    throw new Error("Usa posiciones enteras de 1 a 54, separadas por comas, sin rangos.");
+  const positions=parts.map(Number);
+  if(new Set(positions).size!==positions.length) throw new Error("Hay posiciones repetidas. Registra cada posición una sola vez.");
+  return positions.sort((a,b)=>a-b);
+}
+function resetResult(){
+  for(const id of ["outChk","outCorr","outCombo"]) $(id).textContent="—";
+  $("existingReport").textContent="Datos pendientes de cálculo. Revisa la configuración y pulsa Calcular.";
+  $("existingReport").className="existing-report";
+  const c=$("rotor"); c.getContext("2d").clearRect(0,0,c.width,c.height);
+}
+function readExisting(){
+  if(!["yes","no"].includes($("hasExisting").value)) throw new Error("Selecciona si hay pernos de balance instalados.");
+  if($("hasExisting").value==="no") return [];
+  const positions=parseExistingPositions($("existingPositions").value);
+  if(!$("configurationConfirmed").checked) throw new Error("Confirma que las lecturas corresponden a la configuración de pernos registrada.");
+  return positions;
+}
+
 // -------- Cálculo ----------
 function calcular(){
   try{
     clearError();
+    resetResult();
+    const existing=readExisting();
     const mode=$("mode").value;
     const mod=54;
 
@@ -140,15 +166,25 @@ function calcular(){
     }
     const location=ranges.map(([start,end])=>start===end ? `la posición ${start}` : `las posiciones ${start} y ${end}`).join(" y entre ");
     const installation=labels.length===1 ? `Instalar 1 perno en la posición ${labels[0]}.` : `Instalar ${w} pernos entre ${location}, incluidos los extremos.`;
-    document.getElementById("outCombo").textContent = `${installation}\nSentido antihorario · Vista frontal\n${isHole?"Hole‑centered":"Space‑centered"} · Momento total: ${row.cum.toFixed(2)} oz·in`;
+    document.getElementById("outCombo").textContent = `${existing.length ? installation.replace("Instalar ","Corrección calculada: ") : installation}\nSentido antihorario · Vista frontal\n${isHole?"Hole‑centered":"Space‑centered"} · Momento total: ${row.cum.toFixed(2)} oz·in`;
 
-    draw(AngCorr, idx, mod);
+    const overlaps=labels.filter(position=>existing.includes(position));
+    const report=$("existingReport");
+    if(existing.length){
+      const state=`Registrados: ${existing.length} pernos existentes. Posiciones: ${existing.join(", ")}.`;
+      report.textContent=overlaps.length
+        ? `${state}\nCoincidencia en posiciones: ${overlaps.join(", ")}. La corrección calculada incluye posiciones ya ocupadas; requiere evaluar una combinación alternativa según el apartado 4.C del AMM (SUBTASK 71-00-00-420-088-A). No se ha determinado una configuración final de instalación.`
+        : `${state}\nNo hay coincidencias de posición con la corrección calculada. Esta comprobación solo detecta posiciones ocupadas; no determina ni valida una configuración final.`;
+      report.textContent+="\nNo se calculan retiradas ni redistribuciones de los pernos existentes.";
+      report.className=overlaps.length ? "existing-report conflict" : "existing-report";
+    }else report.textContent="Sin pernos de balance existentes registrados.";
+    draw(AngCorr, idx, mod, existing.map(position=>position-1));
   }catch(err){
     showError(err.message || String(err));
   }
 }
 
-function draw(angleDeg, posIdxList, mod){
+function draw(angleDeg, posIdxList, mod, existingIdx=[]){
   const c=document.getElementById("rotor"), ctx=c.getContext("2d");
   const cx=c.width/2, cy=c.height/2, r=Math.min(c.width,c.height)*0.38;
   ctx.clearRect(0,0,c.width,c.height);
@@ -169,10 +205,14 @@ function draw(angleDeg, posIdxList, mod){
     const ang=(-i*step-90)*Math.PI/180;
     const x=cx+Math.cos(ang)*r, y=cy+Math.sin(ang)*r;
     const sel=posIdxList.includes(i);
+    const installed=existingIdx.includes(i);
     ctx.beginPath(); ctx.arc(x,y, sel?10:4, 0, Math.PI*2);
     ctx.fillStyle=sel?"#ffdf5d":"#63758b"; ctx.fill();
     if(sel){ ctx.strokeStyle="#ffffff"; ctx.lineWidth=2; ctx.stroke(); }
     ctx.fillStyle=sel?"#ffdf5d":"#a6b7cc"; ctx.font=sel?"bold 24px ui-monospace":"22px ui-monospace";
+    if(installed && !sel){ctx.fillStyle="#74e5db";ctx.fillRect(x-9,y-9,18,18);}
+    if(installed && sel){ctx.beginPath();ctx.arc(x,y,15,0,Math.PI*2);ctx.strokeStyle="#ff8d77";ctx.lineWidth=4;ctx.stroke();}
+    ctx.fillStyle=installed && sel?"#ff8d77":sel?"#ffdf5d":installed?"#74e5db":"#a6b7cc";
     const label=String(i+1);
     ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText(label, cx+Math.cos(ang)*(r+23), cy+Math.sin(ang)*(r+23));
@@ -213,10 +253,21 @@ document.querySelectorAll(".chip").forEach(ch=>{
       document.getElementById("n1_1").value = parts[0];
       document.getElementById("n1_2").value = parts[1];
       document.getElementById("n1_3").value = parts[2];
+      resetResult();
     }
   });
 });
 
 // Inicialización
 updateRows();
-try{ calcular(); }catch(_){ /* errores se muestran al pulsar Calcular */ }
+resetResult();
+$("hasExisting").addEventListener("change",()=>{
+  $("existingFields").hidden=$("hasExisting").value!=="yes";
+  $("configurationConfirmed").checked=false;
+  clearError(); resetResult();
+});
+$("existingPositions").addEventListener("input",()=>{$("configurationConfirmed").checked=false;clearError();resetResult();});
+$("configurationConfirmed").addEventListener("change",()=>{clearError();resetResult();});
+for(const id of ["mode","n1_1","n1_2","n1_3","u_1","u_2","u_3","a_1","a_2","a_3"]){
+  $(id).addEventListener(id==="mode"?"change":"input",()=>{clearError();resetResult();});
+}

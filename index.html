@@ -47,6 +47,16 @@
 
   <section>
     <h2><span>Datos de vibración</span><small>01 / ENTRADA</small></h2>
+    <div class="existing-controls">
+      <label for="hasExisting">¿Hay pernos de balance instalados?</label>
+      <select id="hasExisting"><option value="">Selecciona una opción</option><option value="no">No</option><option value="yes">Sí</option></select>
+      <div id="existingFields" hidden>
+        <label for="existingPositions">Posiciones actuales (1 a 54)</label>
+        <input id="existingPositions" type="text" placeholder="Ejemplo: 18, 19, 20" aria-describedby="positionsHelp">
+        <p id="positionsHelp">Escribe cada posición separada por comas. No uses rangos.</p>
+        <label class="confirmation"><input id="configurationConfirmed" type="checkbox">Confirmo que las lecturas de vibración se tomaron con estos pernos instalados en estas posiciones.</label>
+      </div>
+    </div>
     <div class="table-wrap">
       <table>
         <thead>
@@ -87,11 +97,12 @@
     <div class="result">
       <div class="card"><h3>Consistencia (ΔM, Δθ)</h3><div class="big mono" id="outChk">—</div></div>
       <div class="card"><h3>Resultante / Corrección</h3><div class="big mono" id="outCorr">—</div></div>
-      <div class="card"><h3>Instalación de pernos</h3><div class="big mono" id="outCombo">—</div></div>
+      <div class="card"><h3>Corrección calculada</h3><div class="big mono" id="outCombo">—</div></div>
     </div>
+    <div id="existingReport" class="existing-report" role="status" aria-live="polite">Selecciona si hay pernos instalados y pulsa Calcular.</div>
     <div class="diagram-heading"><span>Distribución de pernos</span><span>Vista frontal · ↺ Antihorario</span></div>
 <canvas id="rotor" width="1000" height="1000" aria-label="Distribución de 54 posiciones, numeradas en sentido antihorario desde la posición 1 superior"></canvas>
-<div class="legend"><span><i class="bolt"></i>Pernos seleccionados</span><span><i class="vector"></i>Vector de corrección</span></div>
+<div class="legend"><span><i class="bolt"></i>Corrección calculada</span><span><i class="existing"></i>Existentes (cuadrados)</span><span><i class="overlap"></i>Coincidencia (anillo)</span><span><i class="vector"></i>Vector de corrección</span></div>
   </section>
 </main>
 <footer class="wrap">
